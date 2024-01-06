@@ -29,6 +29,7 @@
 
         document.getElementById('message_input_form').onsubmit = function (e) {
             e.preventDefault();
+            console.log("IHEHE")
             let message = message_input.value.trim();
             if (message.length) {
                 socket.emit('send_message', {
