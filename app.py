@@ -33,6 +33,8 @@ def handle_send_message_event(data):
 def handle_join_room_event(data):
     app.logger.info("{} has joined the room {}".format(data['username'], data['room']))
     join_room(data['room'])
+    print("The code is Here")
+    print(f"This guy came in {data['username']}")
     socketio.emit('join_room_announcement', data, room=data['room'])
 
 
