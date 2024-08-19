@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Lab - Lab Lobby Room</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylehome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lobby.css') }}">
+   
+    
+    <script src="https://source.zoom.us/3.1.0/lib/vendor/react.min.js"></script>
+    <script src="https://source.zoom.us/3.1.0/lib/vendor/react-dom.min.js"></script>
+    <script src="https://source.zoom.us/3.1.0/lib/vendor/redux.min.js"></script>
+    <script src="https://source.zoom.us/3.1.0/lib/vendor/redux-thunk.min.js"></script>
+    <script src="https://source.zoom.us/3.1.0/lib/vendor/lodash.min.js"></script>
+
+    <!-- CDN for component view -->
+    <script src="https://source.zoom.us/zoom-meeting-embedded-3.1.0.min.js"></script>
+    <!-- CDN for signature encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrsasign/10.5.24/jsrsasign-all-min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/zoom.css') }}">
+    <script src="{{ url_for('static', filename='js/lobby.js') }}"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        socket.on('connect', function() {
+            console.log('Connected to Socket.IO server1234');
+            socket.emit('Lobby_loaded');
+            //socket.send('a');
+            });
+        
+
+    </script>
+</head>
+
+
+<body>
+    <!--Navber-->
+    <div class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <img src="static/image/Lablogohorizontal.png" alt="OpenAI Logo">
+            </div>
+            <div id="message"></div>
+        </div>
+        <div class="navbar-menu">
+            <p>Online-Lab</p>
+        </div>
+        <div class="navbar-rightside">
+            <div class="navbar-userimage img">
+                {% if username %}
+                    <img src="/static/uploads/{{ username }}.jpg" alt="User Image">
+                {% endif %}
+            </div>
+            <div class="navbar-username">
+                {% if username %}
+                    Welcome, {{ username }}
+                {% endif %}
+
+            </div>
+            <div class= "usercontrol">
+                <button id="logout">Logout</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
+    
+
+    <div class="First_Container">
+        <!--Lobby part-->
+        <div  class="responsive-div" id = "Welcome_Container">
+            <div class="Explaination_Container">
+                <div class = mesgs>
+                    <div class="msg_history">
+                        <script>
+                        </script>
+                    <!--ส่วนนี้จะถูกเติมด้วย newMessageBlock-->
+                    
+                   
+                    </div>
+                    <div class="input-container">
+                        <textarea id="message_input" placeholder="Type your message here..."></textarea>
+                        <button id="send_message" class="send-button">Send</button>
+                        <script>console.log("ABCD")</script>               
+                    </div>
+                </div>
+            </div>
+
+        
+            <div class="Online_Container">
+                <div class="ready_switch">     
+                    <h4 style="margin-bottom:0px;margin-top:0px;">Ready Switch</h4>
+                    <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider round"></span>
+                </label>
+                </div>
+
+                <div class="Online_Students">                  
+                    <h4 style="margin-bottom:0px;margin-top:0px;">Online Users</h4>
+                    <div id="online-users"></div>
+                </div>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='js/lobby.js') }}"></script>
+        <script>
+            function addNewMessage2(messageText, time, imagepath) {
+                // Create a new message block
+                var imagePath = '/static/' + imagepath; // Modify this line if your app is not served from the root
+                console.log(imagePath);
+
+                var newMessageBlock = document.createElement("div");
+                newMessageBlock.className = "outgoing_msg";
+                newMessageBlock.innerHTML = `
+                <br>
+                <div class="incoming_msg_img">
+                   <img src="${imagePath}" alt="Image">
+                </div>
+                <div class="sent_msg">
+                    <p id = "out">${messageText}</p>
+                <span class="time_date">${time}</span> </div>
+                </div>
+                <br>
+                `;
+
+                // Append the new message block to the chat container
+                var chatContainer = document.querySelector(".msg_history");
+                chatContainer.appendChild(newMessageBlock);
+                scrollToBottom();
+            }
+            function addNewMessage3(messageText, time) {
+                // Create a new message block
+                var newMessageBlock = document.createElement("div");
+                newMessageBlock.className = "incoming_msg";
+                newMessageBlock.innerHTML = `
+                    <br>
+                    <div class="incoming_msg_img">
+                    
+                        <img src="{{ url_for('static', filename='image/cat.jpg') }}" alt="Image">
+                    </div>
+                    <div class="received_msg">
+                        <div class="received_withd_msg_warning">
+                            <p id="in">${messageText}</p>
+                            <a href="{{ url_for('download') }}">
+                            <img src="{{ url_for('static', filename='image/download_icon.png') }}" alt="Download PDF" style="width:50px;height:50px;">
+                            <span class="time_date">${time}</span> 
+                            
+                        </div>
+                    </div>
+                    <br>
+                `;
+                    // Append the new message block to the chat container
+                var chatContainer = document.querySelector(".msg_history");
+                chatContainer.appendChild(newMessageBlock);
+                scrollToBottom()
+            }
+            function addNewAnimatedMessage4(messageText, time) {
+                var uniqueId = "animatedText" + new Date().getTime(); // Generate unique ID
+                messageText = messageText.replace(/<br>/g, '\n');
+                // Create the message block elements as before, using the unique ID for the paragraph
+                var newMessageBlock = document.createElement("div");
+                newMessageBlock.className = "incoming_msg";
+                newMessageBlock.innerHTML = `
+                    <br>
+                    <div class="incoming_msg_img">
+                        <img src="{{ url_for('static', filename='image/cat.jpg') }}" alt="Image">
+                    </div>
+                    
+                    <div class="received_msg">
+                        <div class="loader"></div>
+                         
+                    <div class="received_withd_msg">
+                        
+                    </div>
+                    </div>
+                    <br>
+                    
+                `;
+
+                var chatContainer = document.querySelector(".msg_history");
+                chatContainer.appendChild(newMessageBlock);
+
+
+                scrollToBottom();
+            }
+            function addNewAnimatedMessagandDownload(messageText, time) {
+                var uniqueId = "animatedText" + new Date().getTime(); // Generate unique ID
+                messageText = messageText.replace(/<br>/g, '\n');
+                // Create the message block elements as before, using the unique ID for the paragraph
+                var newMessageBlock = document.createElement("div");
+                newMessageBlock.className = "incoming_msg";
+                newMessageBlock.innerHTML = `
+                    <br>
+                    <div class="incoming_msg_img">
+                        <img src="{{ url_for('static', filename='image/cat.jpg') }}" alt="Image">
+                    </div>
+                    <div class="received_msg">
+                        <div class="received_withd_msg">
+                            <p id="${uniqueId}"></p> <!-- Use the unique ID -->
+                             <a href="{{ url_for('download') }}">
+                            <img src="{{ url_for('static', filename='image/download_icon.png') }}" alt="Download PDF" style="width:50px;height:50px;">
+                            </a>
+                            <span class="time_date">${time}</span>
+                           
+                        </a>
+                        </div>
+                    </div>
+                    <br>
+                `;
+                var chatContainer = document.querySelector(".msg_history");
+            // If there is at least one message, replace the last message with the new one
+                if (chatContainer.children.length > 2) {
+                    var lastMessage = chatContainer.lastElementChild;
+                    chatContainer.replaceChild(newMessageBlock, lastMessage);
+                } else {
+                    // If there are no messages, just append the new one
+                    chatContainer.appendChild(newMessageBlock);
+                }
+
+                // Function to add characters one by one
+                var index = 0;
+                function typeMessage() {
+                    if (index < messageText.length) {
+                        var currentCharacter = messageText.charAt(index);
+                        if (currentCharacter === '\n') {
+                            document.getElementById(uniqueId).innerHTML += '<br>';
+                            scrollToBottom();
+                        } else {
+                            document.getElementById(uniqueId).innerHTML += currentCharacter;
+                        }
+                        index++;
+                        scrollToBottom();
+                        setTimeout(typeMessage, 50); // Adjust typing speed with the timeout value
+                    }
+                }
+
+                typeMessage(); // Start typing animation
+                scrollToBottom();
+                }
+            function addNewAnimatedMessage(messageText, time) {
+            var uniqueId = "animatedText" + new Date().getTime(); // Generate unique ID
+            messageText = messageText.replace(/<br>/g, '\n');
+            // Create the message block elements as before, using the unique ID for the paragraph
+            var newMessageBlock = document.createElement("div");
+            newMessageBlock.className = "incoming_msg";
+            newMessageBlock.innerHTML = `
+                <br>
+                <div class="incoming_msg_img">
+                    <img src="{{ url_for('static', filename='image/cat.jpg') }}" alt="Image">
+                </div>
+                <div class="received_msg">
+                    <div class="received_withd_msg">
+                        <p id="${uniqueId}"></p> <!-- Use the unique ID -->
+                        <span class="time_date">${time}</span>
+                        
+                    </a>
+                    </div>
+                </div>
+                <br>
+            `;
+            var chatContainer = document.querySelector(".msg_history");
+        // If there is at least one message, replace the last message with the new one
+            if (chatContainer.children.length > 2) {
+                var lastMessage = chatContainer.lastElementChild;
+                chatContainer.replaceChild(newMessageBlock, lastMessage);
+            } else {
+                // If there are no messages, just append the new one
+                chatContainer.appendChild(newMessageBlock);
+            }
+
+            // Function to add characters one by one
+            var index = 0;
+            function typeMessage() {
+                if (index < messageText.length) {
+                    var currentCharacter = messageText.charAt(index);
+                    if (currentCharacter === '\n') {
+                        document.getElementById(uniqueId).innerHTML += '<br>';
+                        scrollToBottom();
+                    } else {
+                        document.getElementById(uniqueId).innerHTML += currentCharacter;
+                    }
+                    index++;
+                    scrollToBottom();
+                    setTimeout(typeMessage, 50); // Adjust typing speed with the timeout value
+                }
+            }
+
+            typeMessage(); // Start typing animation
+            scrollToBottom();
+            }
+            
+            //fetchMessage();
+            //addNewAnimatedMessage(details, currentTime);
+        </script>
+        <!--Zoom meeting Ribbon-->
+        <div class ="responsive-div"  id = "Co-worker_Container">
+            <div id="meetingSDKElement">
+                <!-- Zoom Meeting SDK Rendered Here -->
+            </div>
+            <script type="text/javascript">
+                // Make session['username'] available to your JavaScript files
+                var username = "{{ session['username'] | safe }}";
+                </script>
+            <script src="{{ url_for('static', filename='js/zoom_lobby.js') }}"></script>
+        </div>
+    </div>
+</body>
+</html>
+<!--
+<div class="messageContainer">
+                    
+    <div id="greeting"></div>
+    <div id="details"></div>
+</div>
