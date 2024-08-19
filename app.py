@@ -14,9 +14,19 @@ def home():
 def chat():
     username = request.args.get('username')
     room = request.args.get('room')
-
+    session['username'] = username
     if username and room:
-        return render_template('chat.html', username=username, room=room)
+        return render_template('lobby.html', username=username, room=room)
+    else:
+        return redirect(url_for('home'))
+
+@app.route('/lobby')
+def lobby():
+    
+    if 'username' in session:
+        username = session['username']
+        print(username)
+        return render_template('lobby.html', username=username)
     else:
         return redirect(url_for('home'))
 
